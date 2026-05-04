@@ -152,6 +152,15 @@
     .comm-detail { font-size: 11px; color: var(--text2); }
     .comm-amount { font-size: 13px; font-weight: 600; color: var(--green); font-family: 'DM Mono', monospace; flex-shrink: 0; }
 
+    /* Search */
+    .search-wrap { position: relative; margin-bottom: 1.25rem; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); pointer-events: none; display: flex; align-items: center; }
+    .search-input { width: 100%; background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 36px 10px 36px; outline: none; box-shadow: 0 1px 3px rgba(0,0,0,.04); transition: border-color .15s; }
+    .search-input::placeholder { color: var(--text3); }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,79,255,.1); }
+    .search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: var(--bg3); border: none; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); font-size: 14px; line-height: 1; }
+    .search-clear:hover { background: var(--border2); color: var(--text); }
+
     /* States */
     .loading-state { text-align: center; padding: 4rem 1rem; color: var(--text2); font-size: 14px; }
     .error-state { background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 1rem 1.25rem; font-size: 13px; color: var(--red); margin-bottom: 1rem; line-height: 1.6; }
@@ -190,6 +199,15 @@
     <div class="period-months" id="monthBtns"></div>
   </div>
 
+  <!-- Search -->
+  <div class="search-wrap">
+    <span class="search-icon">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </span>
+    <input class="search-input" id="searchInput" type="text" placeholder="Buscar embajador..." oninput="renderAll()" />
+    <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none">✕</button>
+  </div>
+
   <div class="grid2">
     <div class="card"><p class="card-title">Ranking</p><div id="ranking"></div></div>
     <div class="card"><p class="card-title">Comisiones</p><div id="commissions"></div></div>
@@ -220,10 +238,21 @@
   function getYears(){ return [...new Set(allRows.map(r=>r.mk?r.mk.slice(0,4):null).filter(Boolean))].sort(); }
   function getMonthsForYear(y){ return new Set(allRows.filter(r=>r.mk&&r.mk.startsWith(y)).map(r=>r.mk.slice(5,7))); }
 
+  function getSearchQuery(){ return (document.getElementById('searchInput')?.value||'').trim().toLowerCase(); }
+
   function getFiltered(){
-    if(!selectedYear) return allRows;
-    if(!selectedMonth) return allRows.filter(r=>r.mk&&r.mk.startsWith(selectedYear));
-    return allRows.filter(r=>r.mk===`${selectedYear}-${selectedMonth}`);
+    let rows = allRows;
+    if(selectedYear) rows = rows.filter(r=>r.mk&&r.mk.startsWith(selectedYear));
+    if(selectedMonth) rows = rows.filter(r=>r.mk===`${selectedYear}-${selectedMonth}`);
+    const q = getSearchQuery();
+    if(q) rows = rows.filter(r=>r.embajador.toLowerCase().includes(q));
+    return rows;
+  }
+
+  function clearSearch(){
+    document.getElementById('searchInput').value='';
+    document.getElementById('searchClear').style.display='none';
+    renderAll();
   }
 
   function groupBy(rows){
@@ -329,7 +358,12 @@
       </div>`).join('');
   }
 
-  function renderAll(){ const r=getFiltered(); renderMetrics(r); renderRanking(r); renderCommissions(r); }
+  function renderAll(){
+    const q = getSearchQuery();
+    const clearBtn = document.getElementById('searchClear');
+    if(clearBtn) clearBtn.style.display = q ? 'flex' : 'none';
+    const r=getFiltered(); renderMetrics(r); renderRanking(r); renderCommissions(r);
+  }
 
   function setLive(state){
     const dot=document.getElementById('liveDot'), label=document.getElementById('liveLabel');
