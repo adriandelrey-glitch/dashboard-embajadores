@@ -16,6 +16,7 @@
       --text2: #888880;
       --text3: #b0afa8;
       --accent: #5b4fff;
+      --accent-bg: #ede9fe;
       --green: #16a34a;
       --red: #dc2626;
       --blue: #2563eb;
@@ -27,23 +28,22 @@
     body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem; }
     @media (max-width: 640px) { body { padding: 1rem; } }
 
+    /* Header */
     .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
     .header-left h1 { font-size: 22px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
     .header-left p { font-size: 13px; color: var(--text2); margin-top: 3px; }
-    .header-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-    select { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 7px 12px; cursor: pointer; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
-    select:hover { border-color: var(--accent); }
-
+    .header-right { display: flex; gap: 8px; align-items: center; }
     .live-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
     .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
     .live-dot.active { background: var(--green); animation: pulse 2s infinite; }
     @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(22,163,74,.3)} 70%{box-shadow:0 0 0 6px rgba(22,163,74,0)} 100%{box-shadow:0 0 0 0 rgba(22,163,74,0)} }
     .countdown { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); }
 
+    /* Spinner */
     .spinner { width: 20px; height: 20px; border: 2px solid rgba(0,0,0,.1); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 1rem; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Metrics */
     .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
     .metric { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
     .metric::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
@@ -55,12 +55,81 @@
     .metric-value { font-size: 24px; font-weight: 600; color: var(--text); letter-spacing: -.02em; font-family: 'DM Mono', monospace; }
     .metric-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
 
+    /* Period navigator */
+    .period-nav {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+    }
+    .period-years {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg3);
+    }
+    .period-years-label {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-right: 6px;
+      flex-shrink: 0;
+    }
+    .year-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .year-btn:hover { background: var(--bg2); color: var(--text); border-color: var(--border2); }
+    .year-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .period-months {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 6px;
+      padding: 12px 14px;
+    }
+    @media (max-width: 640px) {
+      .period-months { grid-template-columns: repeat(6, 1fr); }
+    }
+    .month-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 4px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text2);
+      cursor: pointer;
+      text-align: center;
+      transition: all .15s;
+    }
+    .month-btn:hover:not(:disabled) { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-bg); }
+    .month-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .month-btn.has-data { color: var(--text); }
+    .month-btn:disabled { color: var(--text3); cursor: default; opacity: .45; }
+
+    /* Grid / Cards */
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
-
     .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
     .card-title { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 1rem; }
 
+    /* Ranking */
     .rank-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
     .rank-row:last-child { border-bottom: none; }
     .rank-num { font-size: 12px; color: var(--text3); width: 18px; text-align: center; flex-shrink: 0; font-family: 'DM Mono', monospace; }
@@ -76,16 +145,17 @@
     .rank-sales { font-size: 13px; font-weight: 600; color: var(--text); font-family: 'DM Mono', monospace; }
     .rank-orders { font-size: 11px; color: var(--text2); }
 
+    /* Commissions */
     .comm-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); gap: 8px; }
     .comm-row:last-child { border-bottom: none; }
     .comm-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
     .comm-detail { font-size: 11px; color: var(--text2); }
     .comm-amount { font-size: 13px; font-weight: 600; color: var(--green); font-family: 'DM Mono', monospace; flex-shrink: 0; }
 
+    /* States */
     .loading-state { text-align: center; padding: 4rem 1rem; color: var(--text2); font-size: 14px; }
     .error-state { background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 1rem 1.25rem; font-size: 13px; color: var(--red); margin-bottom: 1rem; line-height: 1.6; }
-
-    #content { animation: fadeIn .3s ease; }
+    #content { animation: fadeIn .25s ease; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
   </style>
 </head>
@@ -97,7 +167,6 @@
     <p id="dbSub">Conectando con Google Sheets...</p>
   </div>
   <div class="header-right">
-    <select id="periodSel" onchange="renderAll()" style="display:none"></select>
     <div class="live-badge">
       <div class="live-dot" id="liveDot"></div>
       <span id="liveLabel">Conectando...</span>
@@ -111,6 +180,16 @@
 
 <div id="content" style="display:none">
   <div class="metrics" id="metrics"></div>
+
+  <!-- Period navigator -->
+  <div class="period-nav">
+    <div class="period-years">
+      <span class="period-years-label">Año</span>
+      <div id="yearBtns"></div>
+    </div>
+    <div class="period-months" id="monthBtns"></div>
+  </div>
+
   <div class="grid2">
     <div class="card"><p class="card-title">Ranking</p><div id="ranking"></div></div>
     <div class="card"><p class="card-title">Comisiones</p><div id="commissions"></div></div>
@@ -122,26 +201,30 @@
   const COLORS    = ['#5b4fff','#16a34a','#b45309','#db2777','#2563eb','#0d9488','#ea580c','#dc2626'];
   const AVATARBG  = ['#ede9fe','#dcfce7','#fef3c7','#fce7f3','#dbeafe','#ccfbf1','#ffedd5','#fee2e2'];
   const AVATARTXT = ['#4c1d95','#14532d','#78350f','#831843','#1e3a8a','#134e4a','#7c2d12','#7f1d1d'];
+  const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
   let allRows = [], igMap = {};
+  let selectedYear = null, selectedMonth = null;
   let countdown = 300, countdownTimer = null;
 
-  function toTitleCase(str){
-    return String(str).toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-  }
-  function initials(n){
-    return n.trim().split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
-  }
+  function toTitleCase(s){ return String(s).toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()); }
+  function initials(n){ return n.trim().split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase(); }
   function parseDate(v){
     if(!v) return null;
-    const s = String(v), p = s.split('/');
+    const s=String(v), p=s.split('/');
     if(p.length===3) return new Date(+p[2],+p[1]-1,+p[0]);
     return new Date(s);
   }
   function monthKey(d){ return d&&!isNaN(d)?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`:null; }
-  function monthLabel(k){ const [y,m]=k.split('-'); return ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][+m-1]+' '+y; }
-  function getMonths(){ return [...new Set(allRows.map(r=>r.mk).filter(Boolean))].sort(); }
-  function getFiltered(){ const p=document.getElementById('periodSel').value; return p==='all'?allRows:allRows.filter(r=>r.mk===p); }
+
+  function getYears(){ return [...new Set(allRows.map(r=>r.mk?r.mk.slice(0,4):null).filter(Boolean))].sort(); }
+  function getMonthsForYear(y){ return new Set(allRows.filter(r=>r.mk&&r.mk.startsWith(y)).map(r=>r.mk.slice(5,7))); }
+
+  function getFiltered(){
+    if(!selectedYear) return allRows;
+    if(!selectedMonth) return allRows.filter(r=>r.mk&&r.mk.startsWith(selectedYear));
+    return allRows.filter(r=>r.mk===`${selectedYear}-${selectedMonth}`);
+  }
 
   function groupBy(rows){
     const map={};
@@ -154,10 +237,59 @@
     return Object.values(map).sort((a,b)=>b.sales-a.sales);
   }
 
+  function renderNav(){
+    const years = getYears();
+
+    // Year buttons
+    document.getElementById('yearBtns').innerHTML = years.map(y=>`
+      <button class="year-btn${selectedYear===y?' active':''}" onclick="selectYear('${y}')">${y}</button>
+    `).join('');
+
+    // Month buttons — always show all 12, disable those without data
+    const activeMonths = selectedYear ? getMonthsForYear(selectedYear) : new Set();
+    document.getElementById('monthBtns').innerHTML = MONTH_NAMES.map((name,i)=>{
+      const mm = String(i+1).padStart(2,'0');
+      const hasData = activeMonths.has(mm);
+      const isActive = selectedMonth===mm;
+      const disabled = !selectedYear || !hasData;
+      return `<button
+        class="month-btn${isActive?' active':hasData?' has-data':''}"
+        ${disabled?'disabled':''}
+        onclick="selectMonth('${mm}')"
+      >${name}</button>`;
+    }).join('');
+  }
+
+  function selectYear(y){
+    if(selectedYear===y){
+      // deselect → show all
+      selectedYear=null; selectedMonth=null;
+    } else {
+      selectedYear=y; selectedMonth=null;
+    }
+    renderNav(); renderAll();
+  }
+
+  function selectMonth(mm){
+    if(selectedMonth===mm){
+      // deselect month → back to year view
+      selectedMonth=null;
+    } else {
+      selectedMonth=mm;
+    }
+    renderNav(); renderAll();
+  }
+
+  function getPeriodLabel(){
+    if(!selectedYear) return 'Todos los periodos';
+    if(!selectedMonth) return selectedYear;
+    return `${MONTH_NAMES[+selectedMonth-1]} ${selectedYear}`;
+  }
+
   function renderMetrics(rows){
     const ambs=groupBy(rows), ts=rows.reduce((a,r)=>a+r.total,0), tc=rows.reduce((a,r)=>a+r.comision,0), top=ambs[0];
     document.getElementById('metrics').innerHTML=`
-      <div class="metric"><p class="metric-label">Ventas totales</p><p class="metric-value">€${ts.toFixed(2)}</p><p class="metric-sub">${rows.length} pedidos en el periodo</p></div>
+      <div class="metric"><p class="metric-label">Ventas totales</p><p class="metric-value">€${ts.toFixed(2)}</p><p class="metric-sub">${rows.length} pedidos · ${getPeriodLabel()}</p></div>
       <div class="metric"><p class="metric-label">Comisiones</p><p class="metric-value">€${tc.toFixed(2)}</p><p class="metric-sub">${ts>0?((tc/ts)*100).toFixed(1):0}% sobre ventas</p></div>
       <div class="metric"><p class="metric-label">Embajadores</p><p class="metric-value">${ambs.length}</p><p class="metric-sub">activos en el periodo</p></div>
       <div class="metric"><p class="metric-label">Top embajador</p><p class="metric-value" style="font-size:15px;padding-top:4px">${top?top.name.split(' ').slice(0,2).join(' '):'—'}</p><p class="metric-sub">${top?'€'+top.sales.toFixed(2):''}</p></div>
@@ -243,15 +375,21 @@
 
       if(!allRows.length) throw new Error('El script no devolvió datos de ventas.');
 
-      const months=getMonths(), sel=document.getElementById('periodSel');
-      sel.style.display='block';
-      sel.innerHTML=`<option value="all">Todos los periodos</option>`+months.map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join('');
+      // Auto-select most recent year on first load
+      if(!selectedYear){
+        const years=getYears();
+        if(years.length) selectedYear=years[years.length-1];
+      }
+
       const ambs=[...new Set(allRows.map(r=>r.embajador))].length;
       const now=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
       document.getElementById('dbSub').textContent=`${allRows.length} pedidos · ${ambs} embajadores · ${now}`;
       document.getElementById('loadingState').style.display='none';
       document.getElementById('content').style.display='block';
-      setLive('ok'); renderAll(); startCountdown();
+      setLive('ok');
+      renderNav();
+      renderAll();
+      startCountdown();
     }catch(e){
       document.getElementById('loadingState').style.display='none';
       setLive('error');
