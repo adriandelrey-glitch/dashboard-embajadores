@@ -199,13 +199,26 @@
     .select-all-btn:hover { text-decoration: underline; }
     .selected-count { font-size: 12px; color: var(--text2); }
 
-    /* ── Prod grid ── */
-    .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
-    .prod-item { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; transition: all .12s; user-select: none; }
-    .prod-item:hover, .prod-item.selected { border-color: var(--accent); background: var(--accent-bg); }
-    .prod-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
-    .prod-sku { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
-    .prod-size { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    /* ── Prod tabs ── */
+    .prod-tabs { display: flex; background: var(--bg3); border-radius: var(--radius-sm); padding: 3px; gap: 3px; width: fit-content; margin-bottom: 1.25rem; }
+    .prod-tab { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 6px 20px; border-radius: 6px; border: none; background: transparent; color: var(--text2); cursor: pointer; transition: all .15s; }
+    .prod-tab.active { background: var(--bg2); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .prod-tab .count { font-size: 11px; background: var(--accent-bg); color: var(--accent); padding: 1px 6px; border-radius: 10px; margin-left: 5px; font-weight: 600; }
+    .prod-tab.active .count { background: var(--accent); color: #fff; }
+
+    /* ── Prod grid with photos ── */
+    .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+    .prod-item { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; cursor: pointer; transition: all .12s; user-select: none; position: relative; }
+    .prod-item:hover, .prod-item.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-bg); }
+    .prod-item.selected { border-color: var(--accent); }
+    .prod-check { position: absolute; top: 7px; right: 7px; width: 20px; height: 20px; border-radius: 50%; background: var(--bg2); border: 1.5px solid var(--border2); display: flex; align-items: center; justify-content: center; transition: all .12s; }
+    .prod-item.selected .prod-check { background: var(--accent); border-color: var(--accent); }
+    .prod-check svg { display: none; }
+    .prod-item.selected .prod-check svg { display: block; }
+    .prod-photo { width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--bg3); display: block; }
+    .prod-photo-placeholder { width: 100%; aspect-ratio: 1; background: var(--bg3); display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 28px; }
+    .prod-info { padding: 8px 10px; }
+    .prod-name { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; }
 
     /* ── Config row ── */
     .config-row { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
@@ -354,17 +367,29 @@
     <div class="panel" id="panel2">
       <div class="card">
         <p class="card-title">Selecciona productos a enviar</p>
-        <p class="card-sub">Marca los modelos disponibles e indica cuántos se envían aleatoriamente a cada embajador</p>
+        <p class="card-sub">Elige los modelos para hombre y mujer por separado. Se asignará el SKU correcto según la talla de cada embajador.</p>
+
+        <div class="prod-tabs">
+          <button class="prod-tab active" id="prodTabH" onclick="setProdTab('H')">
+            Hombre <span class="count" id="countH">0</span>
+          </button>
+          <button class="prod-tab" id="prodTabM" onclick="setProdTab('M')">
+            Mujer <span class="count" id="countM">0</span>
+          </button>
+        </div>
+
         <div class="search-wrap">
           <span class="search-icon">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           </span>
-          <input class="search-input" id="prodSearch" type="text" placeholder="Buscar producto..." oninput="renderProdList()" />
+          <input class="search-input" id="prodSearch" type="text" placeholder="Buscar modelo..." oninput="renderProdList()" />
         </div>
+
         <div class="prod-grid" id="prodList"></div>
+
         <div class="config-row">
           <div class="config-field">
-            <span class="config-label">Modelos marcados</span>
+            <span class="config-label">Modelos seleccionados</span>
             <span class="config-value" id="totalMarked">0</span>
           </div>
           <div class="config-field">
@@ -410,7 +435,7 @@
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbx8lnbzEBDCJXRZlFwQUTMht_lth8hyO5uZTfXw3x-i6AddPqtJOZPrSOldXkS1RH-KKQ/exec';
+const API = 'https://script.google.com/macros/s/AKfycbyfmbLtF4HAIoMzUNY8CiNgH5jLZUZbx4mv58kf-v5qfJu4GESsyMSnL2y5rkEUowTK2w/exec';
 const COLORS    = ['#5b4fff','#16a34a','#b45309','#db2777','#2563eb','#0d9488','#ea580c','#dc2626'];
 const AVATARBG  = ['#ede9fe','#dcfce7','#fef3c7','#fce7f3','#dbeafe','#ccfbf1','#ffedd5','#fee2e2'];
 const AVATARTXT = ['#4c1d95','#14532d','#78350f','#831843','#1e3a8a','#134e4a','#7c2d12','#7f1d1d'];
@@ -424,9 +449,10 @@ let allRows=[], igMap={}, selectedYear=null, selectedMonth=null;
 let countdown=300, countdownTimer=null;
 
 // ── Envíos state ──
-let embajadores=[], productos=[];
-let selectedAmbs=new Set(), selectedProds=new Set();
-let gender='todos', previewData=[];
+let embajadores=[], productos=[], modelosUnicos=[];
+let selectedAmbs=new Set();
+let selectedProdsH=new Set(), selectedProdsM=new Set(); // por nombre de modelo
+let gender='todos', prodTab='H', previewData=[];
 
 // ════════════════════════════════════════
 // TABS
@@ -580,14 +606,6 @@ function getGenderFromTalla(talla){
   return '';
 }
 
-function processEnvios(){
-  embajadores=(jsonData.embajadores||[]).filter(e=>e['ShippingAddress-FirstName*']);
-  productos=jsonData.productos||[];
-  document.getElementById('envios-loading').style.display='none';
-  document.getElementById('envios-content').style.display='block';
-  renderAmbList(); renderProdList();
-}
-
 function filteredAmbs(){
   const q=(document.getElementById('ambSearch')?.value||'').toLowerCase();
   return embajadores.filter(e=>{
@@ -633,29 +651,85 @@ function setGender(g){
   selectedAmbs.clear(); renderAmbList(); document.getElementById('btnStep2').disabled=true;
 }
 
+function processEnvios(){
+  embajadores=(jsonData.embajadores||[]).filter(e=>e['ShippingAddress-FirstName*']);
+  productos=jsonData.productos||[];
+
+  // Agrupar por nombre único, guardando todas las variantes (tallas/SKUs)
+  const map={};
+  productos.forEach(p=>{
+    if(!map[p.nombre]) map[p.nombre]={ nombre:p.nombre, foto:p.foto||'', variantes:[] };
+    map[p.nombre].variantes.push({ sku:p.sku, talla:p.talla });
+  });
+  modelosUnicos=Object.values(map);
+
+  document.getElementById('envios-loading').style.display='none';
+  document.getElementById('envios-content').style.display='block';
+  renderAmbList(); renderProdList();
+}
+
+// Dado un nombre de modelo y una talla de embajador, devuelve el SKU más adecuado
+function getSkuForTalla(nombre, tallaEmb){
+  const modelo=modelosUnicos.find(m=>m.nombre===nombre);
+  if(!modelo) return null;
+  // Extraer solo la parte de talla sin género (ej. "S Mujer" → "S", "M Hombre" → "M")
+  const tallaClean=String(tallaEmb).replace(/\s*(mujer|hombre)\s*/i,'').trim().toUpperCase();
+  // Buscar variante exacta
+  let match=modelo.variantes.find(v=>v.talla.toUpperCase()===tallaClean);
+  if(!match) match=modelo.variantes[0]; // fallback a primera variante
+  return match ? match.sku : null;
+}
+
+function setProdTab(tab){
+  prodTab=tab;
+  document.getElementById('prodTabH').classList.toggle('active',tab==='H');
+  document.getElementById('prodTabM').classList.toggle('active',tab==='M');
+  renderProdList();
+}
+
+function getActiveProdSet(){ return prodTab==='H' ? selectedProdsH : selectedProdsM; }
+
 function renderProdList(){
   const q=(document.getElementById('prodSearch')?.value||'').toLowerCase();
-  const list=productos.filter(p=>!q||p.nombre.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q));
+  const list=modelosUnicos.filter(m=>!q||m.nombre.toLowerCase().includes(q));
   const el=document.getElementById('prodList');
-  if(!list.length){ el.innerHTML='<div class="empty" style="grid-column:1/-1">No hay productos que coincidan</div>'; return; }
-  el.innerHTML=list.map(p=>`
-    <div class="prod-item${selectedProds.has(p.sku)?' selected':''}" onclick="toggleProd('${p.sku.replace(/'/g,"\\'")}')">
-      <div class="prod-name">${p.nombre}</div>
-      <div class="prod-sku">${p.sku}</div>
-      <div class="prod-size">Talla: ${p.talla}</div>
-    </div>`).join('');
+  const active=getActiveProdSet();
+  if(!list.length){ el.innerHTML='<div class="empty" style="grid-column:1/-1">No hay productos que coincidan</div>'; updateProdConfig(); return; }
+  el.innerHTML=list.map(m=>{
+    const sel=active.has(m.nombre);
+    const fotoHtml=m.foto
+      ?`<img class="prod-photo" src="${m.foto}" alt="${m.nombre}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      :'';
+    const placeholderStyle=m.foto?'style="display:none"':'';
+    return `<div class="prod-item${sel?' selected':''}" onclick="toggleProd('${m.nombre.replace(/'/g,"\\'")}')">
+      <div class="prod-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      ${fotoHtml}
+      <div class="prod-photo-placeholder" ${placeholderStyle}>📦</div>
+      <div class="prod-info"><div class="prod-name">${m.nombre}</div></div>
+    </div>`;
+  }).join('');
   updateProdConfig();
 }
 
-function toggleProd(sku){ selectedProds.has(sku)?selectedProds.delete(sku):selectedProds.add(sku); renderProdList(); }
+function toggleProd(nombre){
+  const active=getActiveProdSet();
+  active.has(nombre)?active.delete(nombre):active.add(nombre);
+  renderProdList();
+  updateProdConfig();
+}
 
 function updateProdConfig(){
-  const total=selectedProds.size, sc=parseInt(document.getElementById('sendCount').value)||1;
+  const totalH=selectedProdsH.size, totalM=selectedProdsM.size;
+  const total=totalH+totalM;
+  const sc=parseInt(document.getElementById('sendCount').value)||1;
   document.getElementById('totalMarked').textContent=total;
+  document.getElementById('countH').textContent=totalH;
+  document.getElementById('countM').textContent=totalM;
   const hint=document.getElementById('sendHint'), btn=document.getElementById('btnStep3');
   if(!total){ hint.textContent=''; btn.disabled=true; return; }
-  if(sc>total){ hint.style.color='var(--red)'; hint.textContent=`Máximo ${total}`; btn.disabled=true; }
-  else { hint.style.color='var(--green)'; hint.textContent=`${sc} de ${total} aleatorios`; btn.disabled=false; }
+  const minSelected=Math.min(...[totalH>0?totalH:Infinity, totalM>0?totalM:Infinity].filter(v=>v!==Infinity));
+  if(sc>minSelected){ hint.style.color='var(--red)'; hint.textContent=`Máximo ${minSelected} (menor selección)`; btn.disabled=true; }
+  else { hint.style.color='var(--green)'; hint.textContent=`${sc} aleatorios por persona`; btn.disabled=false; }
 }
 
 function goToStep(n){
@@ -676,19 +750,37 @@ function getAmbData(name){ return embajadores.find(e=>toTitleCase((e['ShippingAd
 
 function buildPreview(){
   const sc=parseInt(document.getElementById('sendCount').value)||1;
-  const prodList=[...selectedProds].map(sku=>productos.find(p=>p.sku===sku)).filter(Boolean);
   previewData=[];
+
   selectedAmbs.forEach(name=>{
     const emb=getAmbData(name); if(!emb) return;
+
+    // Talla 1
     const t1=emb['Talla']||'';
-    shuffle(prodList).slice(0,sc).forEach(p=>previewData.push({emb,name,talla:t1,producto:p.nombre,sku:p.sku,qty:1}));
+    const g1=getGenderFromTalla(t1);
+    const prodsForT1=g1==='M'?[...selectedProdsM]:[...selectedProdsH];
+    shuffle(prodsForT1).slice(0,sc).forEach(nombre=>{
+      const sku=getSkuForTalla(nombre,t1);
+      if(sku) previewData.push({emb,name,talla:t1,producto:nombre,sku,qty:1});
+    });
+
+    // Talla 2 (segunda persona misma dirección)
     const t2=emb['Talla 2']||'';
-    if(t2&&t2!==t1) shuffle(prodList).slice(0,sc).forEach(p=>previewData.push({emb,name,talla:t2,producto:p.nombre,sku:p.sku,qty:1,isTalla2:true}));
+    if(t2&&t2!==t1){
+      const g2=getGenderFromTalla(t2);
+      const prodsForT2=g2==='M'?[...selectedProdsM]:[...selectedProdsH];
+      shuffle(prodsForT2).slice(0,sc).forEach(nombre=>{
+        const sku=getSkuForTalla(nombre,t2);
+        if(sku) previewData.push({emb,name,talla:t2,producto:nombre,sku,qty:1,isTalla2:true});
+      });
+    }
   });
+
   document.getElementById('summaryBar').innerHTML=`
     <div class="summary-item"><strong>${selectedAmbs.size}</strong> embajadores</div>
     <div class="summary-item"><strong>${sc}</strong> productos por persona</div>
-    <div class="summary-item"><strong>${previewData.length}</strong> líneas en el CSV</div>`;
+    <div class="summary-item"><strong>${previewData.length}</strong> líneas en el CSV</div>
+    <div class="summary-item"><strong>${selectedProdsH.size}</strong> modelos ♂ · <strong>${selectedProdsM.size}</strong> modelos ♀</div>`;
   const hasTalla2=previewData.some(r=>r.isTalla2);
   const ib=document.getElementById('infoBox');
   ib.style.display=hasTalla2?'block':'none';
