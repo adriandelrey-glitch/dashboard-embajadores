@@ -199,7 +199,21 @@
     .select-all-btn:hover { text-decoration: underline; }
     .selected-count { font-size: 12px; color: var(--text2); }
 
-    /* ── Prod tabs ── */
+    /* ── Tag filters ── */
+    .tag-filters { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    .tag-filters-row { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    .tag-filter-group { flex: 1; min-width: 140px; }
+    .tag-filter-label { font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+    .tag-filter-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag-filter-tag { font-size: 11px; padding: 3px 9px; border-radius: 20px; border: 1px solid var(--border2); background: var(--bg3); color: var(--text2); cursor: pointer; transition: all .12s; user-select: none; }
+    .tag-filter-tag:hover { border-color: var(--accent); color: var(--accent); }
+    .tag-filter-tag.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tag-filters-clear { font-size: 11px; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; margin-top: 8px; display: none; }
+    .tag-filters-clear:hover { text-decoration: underline; }
+    .tag-filters-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
+    .tag-filters-title { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; }
+
+    /* ── Tag filters ── */
     .prod-tabs { display: flex; background: var(--bg3); border-radius: var(--radius-sm); padding: 3px; gap: 3px; width: fit-content; margin-bottom: 1.25rem; }
     .prod-tab { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 6px 20px; border-radius: 6px; border: none; background: transparent; color: var(--text2); cursor: pointer; transition: all .15s; }
     .prod-tab.active { background: var(--bg2); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
@@ -346,6 +360,32 @@
           <button class="toggle-btn" onclick="setGender('H')">Hombre</button>
           <button class="toggle-btn" onclick="setGender('M')">Mujer</button>
         </div>
+        <!-- Filtros de etiquetas -->
+        <div class="tag-filters" id="tagFiltersBox" style="display:none">
+          <div class="tag-filters-header">
+            <span class="tag-filters-title">Filtrar por etiquetas</span>
+            <button class="tag-filters-clear" id="clearFiltersBtn" onclick="clearTagFilters()">Limpiar filtros</button>
+          </div>
+          <div class="tag-filters-row">
+            <div class="tag-filter-group">
+              <div class="tag-filter-label">País</div>
+              <div class="tag-filter-tags" id="filterPais"></div>
+            </div>
+            <div class="tag-filter-group">
+              <div class="tag-filter-label">Ciudad</div>
+              <div class="tag-filter-tags" id="filterCiudad"></div>
+            </div>
+            <div class="tag-filter-group">
+              <div class="tag-filter-label">Deporte</div>
+              <div class="tag-filter-tags" id="filterDeporte"></div>
+            </div>
+            <div class="tag-filter-group">
+              <div class="tag-filter-label">Tipo</div>
+              <div class="tag-filter-tags" id="filterTipo"></div>
+            </div>
+          </div>
+        </div>
+
         <div class="search-wrap">
           <span class="search-icon">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -439,7 +479,7 @@
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbyfmbLtF4HAIoMzUNY8CiNgH5jLZUZbx4mv58kf-v5qfJu4GESsyMSnL2y5rkEUowTK2w/exec';
+const API = 'https://script.google.com/macros/s/AKfycbz93yTmR7fSmL1NAZIxW135ocgaWyVktpHVSVFEBOfPmZFKuMvPekdooDZxYkGwdp5yog/exec';
 const COLORS    = ['#5b4fff','#16a34a','#b45309','#db2777','#2563eb','#0d9488','#ea580c','#dc2626'];
 const AVATARBG  = ['#ede9fe','#dcfce7','#fef3c7','#fce7f3','#dbeafe','#ccfbf1','#ffedd5','#fee2e2'];
 const AVATARTXT = ['#4c1d95','#14532d','#78350f','#831843','#1e3a8a','#134e4a','#7c2d12','#7f1d1d'];
@@ -455,8 +495,9 @@ let countdown=300, countdownTimer=null;
 // ── Envíos state ──
 let embajadores=[], productos=[], modelosUnicos=[];
 let selectedAmbs=new Set();
-let selectedProdsH=new Set(), selectedProdsM=new Set(); // por nombre de modelo
+let selectedProdsH=new Set(), selectedProdsM=new Set();
 let gender='todos', prodTab='H', previewData=[];
+let activeFilters={ pais:[], ciudad:[], deporte:[], tipo:[] };
 
 // ════════════════════════════════════════
 // TABS
@@ -610,14 +651,59 @@ function getGenderFromTalla(talla){
   return '';
 }
 
+function buildTagFilters(){
+  const colMap={ pais:'País', ciudad:'Ciudad', deporte:'Deporte', tipo:'Tipo' };
+  const opts={ pais:new Set(), ciudad:new Set(), deporte:new Set(), tipo:new Set() };
+  embajadores.forEach(e=>{
+    Object.keys(colMap).forEach(cat=>{
+      const val=String(e[colMap[cat]]||e[cat]||'');
+      val.split(',').map(v=>v.trim()).filter(Boolean).forEach(v=>opts[cat].add(v));
+    });
+  });
+  const elMap={ pais:'filterPais', ciudad:'filterCiudad', deporte:'filterDeporte', tipo:'filterTipo' };
+  let hasAny=false;
+  Object.keys(opts).forEach(cat=>{
+    const sorted=[...opts[cat]].sort();
+    const el=document.getElementById(elMap[cat]);
+    if(!el) return;
+    if(!sorted.length){ el.innerHTML='<span style="font-size:11px;color:var(--text3)">—</span>'; return; }
+    hasAny=true;
+    el.innerHTML=sorted.map(v=>`<span class="tag-filter-tag${activeFilters[cat].includes(v)?' active':''}" onclick="toggleFilter('${cat}','${v.replace(/'/g,"\\'")}')">${v}</span>`).join('');
+  });
+  const box=document.getElementById('tagFiltersBox');
+  if(box) box.style.display=hasAny?'block':'none';
+  const hasActive=Object.values(activeFilters).some(a=>a.length>0);
+  const btn=document.getElementById('clearFiltersBtn');
+  if(btn) btn.style.display=hasActive?'block':'none';
+}
+
+function toggleFilter(cat, val){
+  const idx=activeFilters[cat].indexOf(val);
+  idx>=0?activeFilters[cat].splice(idx,1):activeFilters[cat].push(val);
+  buildTagFilters(); selectedAmbs.clear();
+  renderAmbList(); document.getElementById('btnStep2').disabled=true;
+}
+
+function clearTagFilters(){
+  activeFilters={ pais:[], ciudad:[], deporte:[], tipo:[] };
+  buildTagFilters(); renderAmbList();
+}
+
 function filteredAmbs(){
   const q=(document.getElementById('ambSearch')?.value||'').toLowerCase();
+  const colMap={ pais:'País', ciudad:'Ciudad', deporte:'Deporte', tipo:'Tipo' };
   return embajadores.filter(e=>{
     const name=toTitleCase((e['ShippingAddress-FirstName*']||'')+' '+(e['ShippingAddress-LastName*']||''));
     const matchQ=!q||name.toLowerCase().includes(q);
     const g=getGenderFromTalla(e['Talla']);
     const matchG=gender==='todos'||!g||g===gender;
-    return matchQ&&matchG;
+    const matchTags=Object.keys(activeFilters).every(cat=>{
+      if(!activeFilters[cat].length) return true;
+      const val=String(e[colMap[cat]]||e[cat]||'');
+      const vals=val.split(',').map(v=>v.trim());
+      return activeFilters[cat].some(f=>vals.includes(f));
+    });
+    return matchQ&&matchG&&matchTags;
   });
 }
 
@@ -672,7 +758,7 @@ function processEnvios(){
 
   document.getElementById('envios-loading').style.display='none';
   document.getElementById('envios-content').style.display='block';
-  renderAmbList(); renderProdList();
+  buildTagFilters(); renderAmbList(); renderProdList();
 }
 
 // Dado un nombre de modelo y una talla de embajador, devuelve el SKU más adecuado
@@ -810,11 +896,13 @@ function resetEnvios(){
   gender='todos';
   prodTab='H';
   previewData=[];
+  activeFilters={ pais:[], ciudad:[], deporte:[], tipo:[] };
   document.getElementById('sendCount').value=1;
   document.getElementById('ambSearch').value='';
   document.getElementById('prodSearch').value='';
   document.querySelectorAll('.toggle-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   goToStep(1);
+  buildTagFilters();
   renderAmbList();
   renderProdList();
   document.getElementById('btnStep2').disabled=true;
